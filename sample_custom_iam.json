@@ -1,0 +1,107 @@
+
+# 
+# creates a custom IAM policy
+# in your aws account.  Can then
+# be applied to any iam user
+#
+
+
+# 
+# allow access to these services
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:*",
+                "athena:*",
+                "dynamodb:*",
+                "lambda:*",
+                "glue:*",
+                "redshift:*",
+                "cloudwatch:*",
+                "logs:*",
+                "events:*",
+                "support:*",
+                "xray:*",
+                "ec2:*",
+                "elasticfilesystem:*",
+                "cloudtrail:*"
+            ],
+            "Resource": "*"
+        },
+
+//
+// allow user to manage their own iam user, password 
+// and MFA configuration
+//
+
+        {
+            "Sid": "ManageOnlyOwnAccount",
+            "Effect": "Allow",
+            "Action": [
+                "iam:ChangePassword",
+                "iam:CreateAccessKey",
+                "iam:CreateLoginProfile",
+                "iam:DeleteAccessKey",
+                "iam:DeleteLoginProfile",
+                "iam:GetLoginProfile",
+                "iam:ListAccessKeys",
+                "iam:UpdateAccessKey",
+                "iam:UpdateLoginProfile",
+                "iam:ListSigningCertificates",
+                "iam:DeleteSigningCertificate",
+                "iam:UpdateSigningCertificate",
+                "iam:UploadSigningCertificate",
+                "iam:ListSSHPublicKeys",
+                "iam:GetSSHPublicKey",
+                "iam:DeleteSSHPublicKey",
+                "iam:UpdateSSHPublicKey",
+                "iam:UploadSSHPublicKey"
+            ],
+            "Resource": "arn:aws:iam::*:user/${aws:username}"
+        },
+        {
+            "Sid": "AllowUserListOwnMFA",
+            "Effect": "Allow",
+            "Action": [
+                "iam:ListMFADevices"
+            ],
+            "Resource": [
+                "arn:aws:iam::*:mfa/*",
+                "arn:aws:iam::*:user/${aws:username}"
+            ]
+        },
+        {
+            "Sid": "AllowUserManageOwnMFA",
+            "Effect": "Allow",
+            "Action": [
+                "iam:CreateVirtualMFADevice",
+                "iam:DeleteVirtualMFADevice",
+                "iam:EnableMFADevice",
+                "iam:ResyncMFADevice"
+            ],
+            "Resource": [
+                "arn:aws:iam::*:mfa/${aws:username}",
+                "arn:aws:iam::*:user/${aws:username}"
+            ]
+        },
+        {
+            "Sid": "AllowUserDeactivateOwnMFA",
+            "Effect": "Allow",
+            "Action": [
+                "iam:DeactivateMFADevice"
+            ],
+            "Resource": [
+                "arn:aws:iam::*:mfa/${aws:username}",
+                "arn:aws:iam::*:user/${aws:username}"
+            ],
+            "Condition": {
+                "Bool": {
+                    "aws:MultiFactorAuthPresent": "true"
+                }
+            }
+        },
+    ]
+}
